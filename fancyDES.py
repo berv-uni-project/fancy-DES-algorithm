@@ -113,7 +113,7 @@ class FancyDES():
         self.position = 0
         blocks = self.getBlocks()
         number_of_blocks = len(blocks)
-        
+        # TODO: Generate key internal
         key_internal = [
             ['0xFF','0xF5', '0xF9', '0xF2'],
             ['0x5F','0x35', '0x25', '0x12'],
@@ -134,8 +134,11 @@ class FancyDES():
                 # xor
                 temp = self.xor(block_left, f_result)
                 # tukar
-                block_left = block_right
-                block_right = temp
+                if (i < round - 1):
+                    block_left = block_right
+                    block_right = temp
+            block_left = self.transpose(block_left)
+            block_right = self.transpose(block_right)
             out_blocks.append(block_left)
             out_blocks.append(block_right)
         chiper = self.blocksToMessage(out_blocks)
@@ -158,4 +161,10 @@ if __name__ == '__main__':
     #print(fancyDES.shift(message=block_right,key=key_internal)) 
     #print(fancyDES.transpose(block_right))
     #print(fancyDES.xor(block_right, key_internal))
-    print(fancyDES.generate_chiper())
+    chiper = fancyDES.generate_chiper()
+    print('Encrypted:')
+    print(chiper)
+    fancyDES1 = FancyDES(message=chiper, key = 'HELLO WORLD! HAHAHHA', fromFile=False)
+    plainteks = fancyDES1.generate_chiper()
+    print('Decrypted:')
+    print(plainteks)
