@@ -90,10 +90,16 @@ class FancyDES():
             round = 7
         self.position = 0
         blocks = self.getBlocks()
-        print(blocks)
-        for i in range(round):
-            print(i)
-            #print(blocks[0])
+        number_of_blocks = len(blocks)
+        for iter_num in range(number_of_blocks // 2):
+            block_left = blocks[iter_num]
+            block_right = blocks[iter_num+1]
+            print(block_left)
+            print(block_right)
+            # process block
+            for i in range(round):
+                print(i)
+                #print(blocks[0])
         return round
 
 if __name__ == '__main__':
