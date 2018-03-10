@@ -24,6 +24,19 @@ class FancyDES():
         output = [[message[3-i][j] for i in range(4)] for j in range(4)]
         return output
 
+    def xor(self, message = None, key = None):
+        output = []
+        for i in range(4):
+            new = []
+            for j in range(4):
+                temp = int(message[i][j], 16) ^ int(key[i][j], 16)
+                new.append('0x{:02X}'.format(temp))
+            output.append(new)
+        return output
+
+    def xor_strings(self, xs, ys):
+        return "".join(chr(ord(x) ^ ord(y)) for x, y in zip(xs, ys))
+
     def shift(self, message = None, key = None):
         output = []
         for i in range(4):
@@ -54,4 +67,5 @@ if __name__ == '__main__':
     ]
     fancyDES = FancyDES('HELLO','HELLO')
     #print(fancyDES.shift(message=block_right,key=key_internal)) 
-    print(fancyDES.transpose(block_right))
+    #print(fancyDES.transpose(block_right))
+    print(fancyDES.xor(block_right, key_internal))
