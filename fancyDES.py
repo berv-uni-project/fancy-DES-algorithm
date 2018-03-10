@@ -35,9 +35,6 @@ class FancyDES():
             output.append(new)
         return output
 
-    def xor_strings(self, xs, ys):
-        return "".join(chr(ord(x) ^ ord(y)) for x, y in zip(xs, ys))
-
     def shift(self, message = None, key = None):
         output = []
         for i in range(4):
@@ -45,7 +42,6 @@ class FancyDES():
             item = deque(message[i])
             for num in key[i]:
                 sum += int(num,16)
-            print(sum%4)
             if (i % 2 == 0):
                 item.rotate((sum % 4) * -1)
             else:
@@ -54,8 +50,15 @@ class FancyDES():
         return output
 
     def messageToBlock(self, message = None):
-        output = [['0x{:02X}'.format(ord(message[i+j])) for i in range(4)] for j in range(4)]
-        return output
+        pos = 0
+        out = []
+        for i in range(4):
+            temp = []
+            for j in range(4):
+                temp.append('0x{:02X}'.format(ord(message[pos])))
+                pos += 1
+            out.append(temp)
+        return out
 
     def messageToBlocks(self, n = 0, message = None):
         position = 0
@@ -71,7 +74,6 @@ class FancyDES():
         temp = self.message
         while len(temp) % 16 != 0:
             temp += '.'
-        print(temp)
         # if sum of block odd, add one block
         sum_blocks = len(temp) // 16
         if sum_blocks % 2 == 1:
@@ -79,6 +81,15 @@ class FancyDES():
             temp += '................'
         blocks = self.messageToBlocks(sum_blocks, temp)
         return blocks
+
+    def blocksToMessage(self, blocks = None):
+        message = ''
+        for block in blocks:
+            for row in block:
+                for item in row:
+                    convert = chr(int(item,16))
+                    message += convert
+        return message
 
     def generate_chiper(self):
         sum = 0
@@ -98,9 +109,12 @@ class FancyDES():
             print(block_right)
             # process block
             for i in range(round):
+                # iterasi per round kiri diapain, kanan diapain
                 print(i)
                 #print(blocks[0])
-        return round
+        print(self.message)
+        chiper = self.blocksToMessage(blocks)
+        return chiper
 
 if __name__ == '__main__':
     key_internal = [
@@ -115,7 +129,7 @@ if __name__ == '__main__':
         ['0xFF','0xF5', '0xF4', '0x42'],
         ['0x6F','0x55', '0x24', '0x32'],
     ]
-    fancyDES = FancyDES('HELLO','HELLO WORLD! HAHAHHA')
+    fancyDES = FancyDES('HELLO WORLD DUDE','HELLO WORLD! HAHAHHA')
     #print(fancyDES.shift(message=block_right,key=key_internal)) 
     #print(fancyDES.transpose(block_right))
     #print(fancyDES.xor(block_right, key_internal))
