@@ -3,8 +3,13 @@ import random
 
 class FancyDES():
 
-    def __init__(self, message, key):
-        self.message = message
+    def __init__(self, path=None, message = None, key = None, fromFile = False):
+        if (fromFile):
+            files = open(path, 'r')
+            self.message = files.read()   
+        else:
+            self.message = message
+        
         self.key = key
 
     def message_to_block(self, message = ''):
@@ -91,6 +96,12 @@ class FancyDES():
                     message += convert
         return message
 
+    def f_function(self, block = None, key= None):
+        xor_result = self.xor(block, key)
+        shift_result = self.shift(xor_result, key)
+        # subsitusi s-box
+        return shift_result
+
     def generate_chiper(self):
         sum = 0
         for i in self.key:
@@ -102,18 +113,31 @@ class FancyDES():
         self.position = 0
         blocks = self.getBlocks()
         number_of_blocks = len(blocks)
+        
+        key_internal = [
+            ['0xFF','0xF5', '0xF9', '0xF2'],
+            ['0x5F','0x35', '0x25', '0x12'],
+            ['0xFF','0xF5', '0x64', '0x42'],
+            ['0x6F','0x55', '0x53', '0x32'],
+        ]
+        out_blocks = []
         for iter_num in range(number_of_blocks // 2):
             block_left = blocks[iter_num]
             block_right = blocks[iter_num+1]
-            print(block_left)
-            print(block_right)
+            #initiate with transpose
+            block_left = self.transpose(block_left)
+            block_right = self.transpose(block_right)
             # process block
             for i in range(round):
-                # iterasi per round kiri diapain, kanan diapain
-                print(i)
-                #print(blocks[0])
-        print(self.message)
-        chiper = self.blocksToMessage(blocks)
+                # Fungsi f terhadap blok kanan
+                f_result = self.f_function(block_right, key_internal)
+                # xor
+                block_right = self.xor(block_left, f_result)
+                # tukar
+                block_left = block_right
+            out_blocks.append(block_left)
+            out_blocks.append(block_right)
+        chiper = self.blocksToMessage(out_blocks)
         return chiper
 
 if __name__ == '__main__':
@@ -129,7 +153,7 @@ if __name__ == '__main__':
         ['0xFF','0xF5', '0xF4', '0x42'],
         ['0x6F','0x55', '0x24', '0x32'],
     ]
-    fancyDES = FancyDES('HELLO WORLD DUDE','HELLO WORLD! HAHAHHA')
+    fancyDES = FancyDES(path='samples/text.txt',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
     #print(fancyDES.shift(message=block_right,key=key_internal)) 
     #print(fancyDES.transpose(block_right))
     #print(fancyDES.xor(block_right, key_internal))
