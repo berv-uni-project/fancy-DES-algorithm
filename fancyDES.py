@@ -125,8 +125,8 @@ class FancyDES():
             block_left = blocks[iter_num]
             block_right = blocks[iter_num+1]
             #initiate with transpose
-            block_left = self.transpose(block_left)
-            block_right = self.transpose(block_right)
+            #block_left = self.transpose(block_left)
+            #block_right = self.transpose(block_right)
             # process block
             for i in range(round):
                 # Fungsi f terhadap blok kanan
@@ -137,30 +137,18 @@ class FancyDES():
                 if (i < round - 1):
                     block_left = block_right
                     block_right = temp
-            block_left = self.transpose(block_left)
-            block_right = self.transpose(block_right)
+                else:
+                    block_left = temp
+                    block_right = block_right
+            #block_left = self.transpose(block_left)
+            #block_right = self.transpose(block_right)
             out_blocks.append(block_left)
             out_blocks.append(block_right)
         chiper = self.blocksToMessage(out_blocks)
         return chiper
 
 if __name__ == '__main__':
-    key_internal = [
-            ['0xFF','0xF5', '0xF9', '0xF2'],
-            ['0x5F','0x35', '0x25', '0x12'],
-            ['0xFF','0xF5', '0x64', '0x42'],
-            ['0x6F','0x55', '0x53', '0x32'],
-        ]
-    block_right = [
-        ['0xFF','0xF5', '0xF4', '0xF2'],
-        ['0x5F','0x35', '0x24', '0x12'],
-        ['0xFF','0xF5', '0xF4', '0x42'],
-        ['0x6F','0x55', '0x24', '0x32'],
-    ]
     fancyDES = FancyDES(path='samples/text.txt',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
-    #print(fancyDES.shift(message=block_right,key=key_internal)) 
-    #print(fancyDES.transpose(block_right))
-    #print(fancyDES.xor(block_right, key_internal))
     chiper = fancyDES.generate_chiper()
     print('Encrypted:')
     print(chiper)
