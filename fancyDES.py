@@ -30,6 +30,10 @@ class FancyDES():
         output = [[message[3-i][j] for i in range(4)] for j in range(4)]
         return output
 
+    def transpose_back(self, message = None):
+        output = [[message[i][3-j] for i in range(4)] for j in range(4)]
+        return output
+
     def xor(self, message = None, key = None):
         output = []
         for i in range(4):
@@ -125,8 +129,8 @@ class FancyDES():
             block_left = blocks[iter_num]
             block_right = blocks[iter_num+1]
             #initiate with transpose
-            #block_left = self.transpose(block_left)
-            #block_right = self.transpose(block_right)
+            block_left = self.transpose(block_left)
+            block_right = self.transpose(block_right)
             # process block
             for i in range(round):
                 # Fungsi f terhadap blok kanan
@@ -140,8 +144,8 @@ class FancyDES():
                 else:
                     block_left = temp
                     block_right = block_right
-            #block_left = self.transpose(block_left)
-            #block_right = self.transpose(block_right)
+            block_left = self.transpose_back(block_left)
+            block_right = self.transpose_back(block_right)
             out_blocks.append(block_left)
             out_blocks.append(block_right)
         chiper = self.blocksToMessage(out_blocks)
