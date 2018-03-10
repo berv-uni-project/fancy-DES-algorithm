@@ -132,9 +132,10 @@ class FancyDES():
                 # Fungsi f terhadap blok kanan
                 f_result = self.f_function(block_right, key_internal)
                 # xor
-                block_right = self.xor(block_left, f_result)
+                temp = self.xor(block_left, f_result)
                 # tukar
                 block_left = block_right
+                block_right = temp
             out_blocks.append(block_left)
             out_blocks.append(block_right)
         chiper = self.blocksToMessage(out_blocks)
