@@ -14,7 +14,7 @@ class FancyDES():
                 self.message = files.read()
         else:
             self.message = message
-        print("MSG", self.message)
+        # print("MSG", self.message)
         self.key = key
         self.internal_keys = []
 
@@ -183,11 +183,6 @@ class FancyDES():
                     block_left = temp
                     block_right = block_right
 
-                print("itr", i + 1)
-                print(block_left)
-                print(block_right)
-                print()
-                print()
             block_left = self.transpose_back(block_left)
             block_right = self.transpose_back(block_right)
             out_blocks.append(block_left)
