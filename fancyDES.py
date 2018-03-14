@@ -5,6 +5,7 @@ import sbox
 import hashlib
 import random
 import numpy as np
+import time
 
 class FancyDES():
 
@@ -135,7 +136,7 @@ class FancyDES():
         for i in self.key:
             sum += ord(i)
         random.seed(sum)
-        n_round = random.randint(2,3)
+        n_round = random.randint(7,25)
         return n_round
 
     def feistel_network(self, blocks, n_round):
@@ -169,8 +170,14 @@ class FancyDES():
 
         return [block_left, block_right]
 
+    def generate_iv(self):
+        iv = [0,0]
+        iv[0] = np.array([[random.randint(0,255) for i in range(4)] for i in range(4)])
+        iv[1] = np.array([[random.randint(0,255) for i in range(4)] for i in range(4)])
 
-    def generate_cipher(self, mode = 'encrypt'):
+        return iv
+
+    def generate_cipher(self, decrypt=False, mode="EBC"):
         n_round = self.get_num_round()
         # print('round', n_round)
         blocks = self.getBlocks()
@@ -179,16 +186,36 @@ class FancyDES():
         # print('intkey', len(self.internal_keys))
         box = sbox.sbox
 
-        if (mode == 'decrypt'):
+        if (decrypt):
             self.internal_keys = self.internal_keys[::-1]
             # print("decrypt")
 
         out_blocks = []
         # pprint(self.internal_keys)
+        prev_block = self.generate_iv()
         for i in range(0, len(blocks), 2):
-            cipher = self.feistel_network(blocks[i:i+2], n_round)
-            out_blocks.append(cipher[0])
-            out_blocks.append(cipher[1])
+            if (mode == "EBC"):
+                cipher = self.feistel_network(blocks[i:i+2], n_round)
+                out_blocks.append(cipher[0])
+                out_blocks.append(cipher[1])
+            elif (mode == "CBC"):
+                curr_blocks = blocks[i:i+2]
+
+                if (not decrypt):
+                    curr_blocks[0] = curr_blocks[0] ^ prev_block[0]
+                    curr_blocks[1] = curr_blocks[1] ^ prev_block[1]
+
+                cipher = self.feistel_network(curr_blocks, n_round)
+
+                if (decrypt):
+                    cipher[0] = cipher[0] ^ prev_block[0]
+                    cipher[1] = cipher[1] ^ prev_block[1]
+                    prev_block = curr_blocks
+                else:
+                    prev_block = cipher
+
+                out_blocks.append(cipher[0])
+                out_blocks.append(cipher[1])
         # print(len(out_blocks))
         cipher = self.blocksToMessage(out_blocks)
         return cipher
@@ -197,13 +224,13 @@ if __name__ == '__main__':
     # fancyDES = FancyDES(path='README.md',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
     # fancyDES = FancyDES(path='samples/text.txt',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
     # fancyDES = FancyDES(path='samples/lorem-ipsum.txt',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
-    fancyDES = FancyDES(path='LICENSE',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
-    cipher = fancyDES.generate_cipher()
+    fancyDES = FancyDES(path='LICENSE', key = 'HELLO WORLD! HAHAHHA', fromFile=True)
+    cipher = fancyDES.generate_cipher(mode="CBC")
     print('Encrypted:')
     print(cipher, len(cipher))
 
     fancyDES1 = FancyDES(message=cipher, key = 'HELLO WORLD! HAHAHHA', fromFile=False)
-    plainteks = fancyDES1.generate_cipher(mode="decrypt")
+    plainteks = fancyDES1.generate_cipher(decrypt=True, mode="CBC")
     print('Decrypted:')
     print(plainteks, len(plainteks))
 
