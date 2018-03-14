@@ -216,6 +216,25 @@ class FancyDES():
 
                 out_blocks.append(cipher[0])
                 out_blocks.append(cipher[1])
+            elif (mode == "CFB"):
+                curr_blocks = blocks[i:i+2]
+                prev_block = self.feistel_network(prev_block,n_round)
+                cipher = []
+                cipher.append(curr_blocks[0] ^ prev_block[0])
+                cipher.append(curr_blocks[1] ^ prev_block[1])
+                out_blocks.append(cipher[0])
+                out_blocks.append(cipher[1])
+
+                if (decrypt):
+                    prev_block = curr_blocks
+                else:
+                    prev_block = cipher
+            elif (mode == "OFB"):
+                curr_blocks = blocks[i:i+2]
+                prev_block = self.feistel_network(prev_block, n_round)
+                out_blocks.append(curr_blocks[0] ^ prev_block[0])
+                out_blocks.append(curr_blocks[1] ^ prev_block[1])
+
         # print(len(out_blocks))
         cipher = self.blocksToMessage(out_blocks)
         return cipher
@@ -225,12 +244,12 @@ if __name__ == '__main__':
     # fancyDES = FancyDES(path='samples/text.txt',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
     # fancyDES = FancyDES(path='samples/lorem-ipsum.txt',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
     fancyDES = FancyDES(path='LICENSE', key = 'HELLO WORLD! HAHAHHA', fromFile=True)
-    cipher = fancyDES.generate_cipher(mode="CBC")
+    cipher = fancyDES.generate_cipher(mode="OFB")
     print('Encrypted:')
     print(cipher, len(cipher))
 
     fancyDES1 = FancyDES(message=cipher, key = 'HELLO WORLD! HAHAHHA', fromFile=False)
-    plainteks = fancyDES1.generate_cipher(decrypt=True, mode="CBC")
+    plainteks = fancyDES1.generate_cipher(decrypt=True, mode="OFB")
     print('Decrypted:')
     print(plainteks, len(plainteks))
 
