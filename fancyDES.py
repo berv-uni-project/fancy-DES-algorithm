@@ -121,13 +121,13 @@ class FancyDES():
         return self.message
 
     # f function
-    def f_function(self, block = None, key = None, sbox = sbox.sbox):
+    def f_function(self, block = None, key = None):
         # print(type(block), type(key))
         xor_result = block ^ key
         # shift_result = self.shift(xor_result, key)
         shift_result = xor_result
         # subsitusi s-box
-        sbox_result = self.sub_sbox(shift_result, sbox)
+        sbox_result = self.sub_sbox(shift_result, sbox.sbox)
         return sbox_result
 
     def get_num_round(self):
@@ -137,6 +137,38 @@ class FancyDES():
         random.seed(sum)
         n_round = random.randint(2,3)
         return n_round
+
+    def feistel_network(self, blocks, n_round):
+        block_left = blocks[0]
+        block_right = blocks[1]
+
+        #initiate with transpose
+        block_left = self.transpose(block_left)
+        block_right = self.transpose(block_right)
+
+        # process block
+
+        for i in range(n_round):
+            key_internal = self.internal_keys[i]
+            # Fungsi f terhadap blok kanan
+            f_result = self.f_function(block_right, key_internal)
+
+            # xor
+            temp = block_left ^ f_result
+
+            # tukar
+            if (i < n_round - 1):
+                block_left = block_right
+                block_right = temp
+            else:
+                block_left = temp
+                block_right = block_right
+
+        block_left = self.transpose_back(block_left)
+        block_right = self.transpose_back(block_right)
+
+        return [block_left, block_right]
+
 
     def generate_cipher(self, mode = 'encrypt'):
         n_round = self.get_num_round()
@@ -153,40 +185,10 @@ class FancyDES():
 
         out_blocks = []
         # pprint(self.internal_keys)
-        for iter_num in range(0, len(blocks), 2):
-            block_left = blocks[iter_num]
-            block_right = blocks[iter_num+1]
-
-            # if (mode == 'decrypt'):
-            #     block_left = blocks[iter_num+1]
-            #     block_right = blocks[iter_num]
-
-            #initiate with transpose
-            block_left = self.transpose(block_left)
-            block_right = self.transpose(block_right)
-
-            # process block
-
-            for i in range(n_round):
-                key_internal = self.internal_keys[i]
-                # Fungsi f terhadap blok kanan
-                f_result = self.f_function(block_right, key_internal, sbox=box)
-
-                # xor
-                temp = block_left ^ f_result
-
-                # tukar
-                if (i < n_round - 1):
-                    block_left = block_right
-                    block_right = temp
-                else:
-                    block_left = temp
-                    block_right = block_right
-
-            block_left = self.transpose_back(block_left)
-            block_right = self.transpose_back(block_right)
-            out_blocks.append(block_left)
-            out_blocks.append(block_right)
+        for i in range(0, len(blocks), 2):
+            cipher = self.feistel_network(blocks[i:i+2], n_round)
+            out_blocks.append(cipher[0])
+            out_blocks.append(cipher[1])
         # print(len(out_blocks))
         cipher = self.blocksToMessage(out_blocks)
         return cipher
