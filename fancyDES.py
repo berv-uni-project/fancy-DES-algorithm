@@ -6,6 +6,7 @@ import hashlib
 import random
 import numpy as np
 import time
+import binascii
 
 class FancyDES():
 
@@ -264,14 +265,16 @@ class FancyDES():
 if __name__ == '__main__':
     fancyDES = FancyDES(path='README.md',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
     # fancyDES = FancyDES(path='samples/text.txt',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
-    # fancyDES = FancyDES(path='samples/lorem-ipsum.txt',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
-    fancyDES = FancyDES(path='LICENSE', key = 'HELLO WORLD! HAHAHHA', fromFile=True)
-    cipher = fancyDES.generate_cipher(mode="CFB")
+    fancyDES = FancyDES(path='samples/lorem-ipsum.txt',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
+    #fancyDES = FancyDES(path='LICENSE', key = 'HELLO WORLD! HAHAHHA', fromFile=True)
+    cipher = fancyDES.generate_cipher(mode="EBC")
     print('Encrypted:')
     print(cipher, len(cipher))
-
+    f = open('output.txt', 'w+')
+    f.write(binascii.hexlify(bytes(cipher)).decode('utf-8'))
+    f.close()
     fancyDES1 = FancyDES(message=cipher, key = 'HELLO WORLD! HAHAHHA', fromFile=False)
-    plainteks = fancyDES1.generate_cipher(decrypt=True, mode="CFB")
+    plainteks = fancyDES1.generate_cipher(decrypt=True, mode="EBC")
     print('Decrypted:')
     print(plainteks, len(plainteks))
 
