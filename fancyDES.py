@@ -66,10 +66,22 @@ class FancyDES():
         return np.array(output)
 
     # shift message based on internal key on that round
-    def shift(self, message = None, key = None):
+    def shift_horizontal(self, message = None, key = None):
         output = []
         for i in range(4):
             item = deque(message[i])
+            key_sum = sum(key[i])
+            if (i % 2 == 0):
+                item.rotate((key_sum % 4) * -1)
+            else:
+                item.rotate(key_sum % 4)
+            output.append(list(item))
+        return np.array(output)
+
+    def shift_vertical(self, message = None, key = None):
+        output = []
+        for i in range(4):
+            item = deque([message[j][i] for j in range(4)])
             key_sum = sum(key[i])
             if (i % 2 == 0):
                 item.rotate((key_sum % 4) * -1)
@@ -126,10 +138,15 @@ class FancyDES():
     def f_function(self, block = None, key = None):
         # print(type(block), type(key))
         xor_result = block ^ key
-        # shift_result = self.shift(xor_result, key)
-        shift_result = xor_result
+        shift_result = self.shift_horizontal(xor_result, key)
+        shift_result2 = self.shift_vertical(block, block)
+        a  = shift_result ^ shift_result2
+
+        # TODO: Ubah parameter shift jadi (block, num_shift)
+        # shift vertical pake random dengan seed = jumlah message
+
         # subsitusi s-box
-        sbox_result = self.sub_sbox(shift_result, sbox.sbox)
+        sbox_result = self.sub_sbox(a, sbox.sbox)
         return sbox_result
 
     def get_num_round(self):
@@ -190,7 +207,7 @@ class FancyDES():
                 break
         return block
 
-    def generate_cipher(self, decrypt=False, mode="EBC"):
+    def generate_cipher(self, decrypt=False, mode="ECB"):
         n_round = self.get_num_round()
         # print('round', n_round)
         blocks = self.getBlocks()
@@ -199,7 +216,7 @@ class FancyDES():
         # print('intkey', len(self.internal_keys))
         box = sbox.sbox
 
-        if (decrypt and mode in ["CBC", "EBC"]):
+        if (decrypt and mode in ["CBC", "ECB"]):
             self.internal_keys = self.internal_keys[::-1]
             # print("decrypt")
 
@@ -207,7 +224,7 @@ class FancyDES():
         # pprint(self.internal_keys)
         prev_block = iv = self.generate_iv()
         for i in range(0, len(blocks), 2):
-            if (mode == "EBC"):
+            if (mode == "ECB"):
                 cipher = self.feistel_network(blocks[i:i+2], n_round)
                 out_blocks.append(cipher[0])
                 out_blocks.append(cipher[1])
@@ -231,7 +248,7 @@ class FancyDES():
                 out_blocks.append(cipher[1])
             elif (mode == "CTR"):
                 cipher = self.feistel_network(iv, n_round)
-                print (cipher)
+                # print (cipher)
                 cipher[0] = cipher[0] ^ blocks[i]
                 cipher[1] = cipher[1] ^ blocks[i+1]
 
@@ -262,30 +279,35 @@ class FancyDES():
         cipher = self.blocksToMessage(out_blocks)
         return cipher
 
-if __name__ == '__main__':
-    fancyDES = FancyDES(path='README.md',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
-    # fancyDES = FancyDES(path='samples/text.txt',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
-    fancyDES = FancyDES(path='samples/lorem-ipsum.txt',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
-    #fancyDES = FancyDES(path='LICENSE', key = 'HELLO WORLD! HAHAHHA', fromFile=True)
-    cipher = fancyDES.generate_cipher(mode="EBC")
-    print('Encrypted:')
-    print(cipher, len(cipher))
-    f = open('output.txt', 'w+')
-    f.write(binascii.hexlify(bytes(cipher)).decode('utf-8'))
-    f.close()
-    fancyDES1 = FancyDES(message=cipher, key = 'HELLO WORLD! HAHAHHA', fromFile=False)
-    plainteks = fancyDES1.generate_cipher(decrypt=True, mode="EBC")
-    print('Decrypted:')
-    print(plainteks, len(plainteks))
 
-    # fancyDES.gen_internal_key(7)
-    # block = [
-    #     ['0xFF','0xF5', '0xF9', '0xF2'],
-    #     ['0x5F','0x35', '0x25', '0x12'],
-    #     ['0xFF','0xF5', '0x64', '0x42'],
-    #     ['0x6F','0x55', '0x53', '0x32'],
-    # ]
-    # block = fancyDES.sub_sbox(block)
-    # for row in block:
-    #     for el in row:
-    #         print('0x{:02X}'.format(el))
+if __name__ == '__main__':
+    fancyDES = FancyDES(path='samples/short.txt',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
+    # fancyDES = FancyDES(path='samples/text.txt',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
+    # fancyDES = FancyDES(path='samples/lorem-ipsum.txt',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
+    #fancyDES = FancyDES(path='LICENSE', key = 'HELLO WORLD! HAHAHHA', fromFile=True)
+
+    b = bytearray(fancyDES.message)
+
+    cipher = fancyDES.generate_cipher(mode="CBC")
+    print('Encrypted:')
+    print(binascii.hexlify(cipher), len(cipher))
+
+    # Check changed plaintext
+    # b[12] +=1
+    # fancyDES.message = b
+    #
+    # cipher = fancyDES.generate_cipher(mode="CBC")
+    # print('Encrypted:')
+    # print(binascii.hexlify(cipher), len(cipher))
+
+    # check changed ciphertext
+    # cipher[4] += 1
+
+    # f = open('samples/output/output-OFB.txt', 'wb')
+    # f.write(cipher)
+    # f.close()
+    fancyDES1 = FancyDES(message=cipher, key = 'HELLO WORLD! HAHAHHA', fromFile=False)
+    plainteks = fancyDES1.generate_cipher(decrypt=True, mode="CBC")
+    print('Decrypted:')
+    # print(binascii.hexlify(plainteks), len(plainteks))
+    print(plainteks, len(plainteks))
