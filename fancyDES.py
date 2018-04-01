@@ -281,14 +281,15 @@ class FancyDES():
 
 
 if __name__ == '__main__':
-    fancyDES = FancyDES(path='samples/short.txt',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
+    MODE = "OFB"
+    # fancyDES = FancyDES(path='samples/short.txt',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
     # fancyDES = FancyDES(path='samples/text.txt',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
-    # fancyDES = FancyDES(path='samples/lorem-ipsum.txt',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
+    fancyDES = FancyDES(path='samples/lorem-ipsum.txt',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
     #fancyDES = FancyDES(path='LICENSE', key = 'HELLO WORLD! HAHAHHA', fromFile=True)
 
     b = bytearray(fancyDES.message)
 
-    cipher = fancyDES.generate_cipher(mode="CBC")
+    cipher = fancyDES.generate_cipher(mode=MODE)
     print('Encrypted:')
     print(binascii.hexlify(cipher), len(cipher))
 
@@ -303,11 +304,11 @@ if __name__ == '__main__':
     # check changed ciphertext
     # cipher[4] += 1
 
-    # f = open('samples/output/output-OFB.txt', 'wb')
-    # f.write(cipher)
-    # f.close()
+    f = open('samples/output/output-'+MODE+'.txt', 'wb')
+    f.write(cipher)
+    f.close()
     fancyDES1 = FancyDES(message=cipher, key = 'HELLO WORLD! HAHAHHA', fromFile=False)
-    plainteks = fancyDES1.generate_cipher(decrypt=True, mode="CBC")
+    plainteks = fancyDES1.generate_cipher(decrypt=True, mode=MODE)
     print('Decrypted:')
     # print(binascii.hexlify(plainteks), len(plainteks))
     print(plainteks, len(plainteks))
