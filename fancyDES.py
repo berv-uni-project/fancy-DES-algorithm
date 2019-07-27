@@ -54,13 +54,14 @@ class FancyDES():
             new_block = block ^ new_block
             self.internal_keys.append(new_block)
             block = new_block
-
-        # pprint(self.internal_keys)
-
+            # pprint(self.internal_keys)
+    
+    @classmethod
     def transpose(self, message = None):
         output = [[message[3-i][j] for i in range(4)] for j in range(4)]
         return np.array(output)
 
+    @classmethod
     def transpose_back(self, message = None):
         output = [[message[i][3-j] for i in range(4)] for j in range(4)]
         return np.array(output)
