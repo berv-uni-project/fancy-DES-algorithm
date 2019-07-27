@@ -21,7 +21,7 @@ class FancyDES():
         self.internal_keys = []
 
     # Substitute block with the given sbox
-    def sub_sbox(self, block, box):
+    def _sub_sbox(self, block, box):
         new_block = np.copy(block)
         for i in range(4):
             for j in range(4):
@@ -31,7 +31,7 @@ class FancyDES():
         return new_block
 
     # Generate internal key used in each round
-    def gen_internal_key(self, n_round):
+    def _gen_internal_key(self, n_round):
         h = hashlib.sha256()
         h.update(self.key.encode('utf-8'))
         key_hashed = list(h.digest())
@@ -49,25 +49,24 @@ class FancyDES():
         # print (block)
 
         # generate other key
+        count_sum = n_round - 1
         for i in range(n_round - 1):
-            new_block = self.sub_sbox(block, sbox.sbox)
+            print(f'Blocking Percentage {i * 100.0 / count_sum} %')
+            new_block = self._sub_sbox(block, sbox.sbox)
             new_block = block ^ new_block
             self.internal_keys.append(new_block)
             block = new_block
-            # pprint(self.internal_keys)
     
-    @classmethod
-    def transpose(self, message = None):
+    def _transpose(self, message = None):
         output = [[message[3-i][j] for i in range(4)] for j in range(4)]
         return np.array(output)
 
-    @classmethod
-    def transpose_back(self, message = None):
+    def _transpose_back(self, message = None):
         output = [[message[i][3-j] for i in range(4)] for j in range(4)]
         return np.array(output)
 
     # shift message based on internal key on that round
-    def shift_horizontal(self, message = None, key = None):
+    def _shift_horizontal(self, message = None, key = None):
         output = []
         for i in range(4):
             item = deque(message[i])
@@ -79,7 +78,7 @@ class FancyDES():
             output.append(list(item))
         return np.array(output)
 
-    def shift_vertical(self, message = None, key = None):
+    def _shift_vertical(self, message = None, key = None):
         output = []
         for i in range(4):
             item = deque([message[j][i] for j in range(4)])
@@ -92,12 +91,13 @@ class FancyDES():
         return np.array(output)
 
     # change a 16-byte msg to a block matrix
-    def messageToBlock(self, message = None):
+    def _message_to_block(self, message = None):
         pos = 0
         out = []
         for i in range(4):
             temp = []
             for j in range(4):
+                print(f'Block convert percentage {j * 100.0 / 16}%')
                 temp.append(message[pos])
                 pos += 1
             out.append(temp)
@@ -105,17 +105,18 @@ class FancyDES():
         return np.array(out)
 
     # change list of message to list of block
-    def messageToBlocks(self, n = 0, message = None):
+    def _message_to_blocks(self, n = 0, message = None):
         position = 0
         blocks = []
         for i in range(n):
+            print(f'Convert Message {i * 100.0 / n} %')
             block = message[position:position+16]
-            blocks.append(self.messageToBlock(block))
+            blocks.append(self._message_to_block(block))
             position += 16
         return blocks
 
     # get block from bytes of message
-    def getBlocks(self):
+    def _get_blocks(self):
         # expand to 16 byte each
         temp = bytearray(self.message)
         while len(temp) % 32 != 0:
@@ -124,10 +125,10 @@ class FancyDES():
         # print(len(self.message))
         # print(len(temp))
         # print (temp, len(temp))
-        blocks = self.messageToBlocks(sum_blocks, temp)
+        blocks = self._message_to_blocks(sum_blocks, temp)
         return blocks
 
-    def blocksToMessage(self, blocks = None):
+    def _blocks_to_message(self, blocks = None):
         self.message = bytearray()
         for block in blocks:
             for row in block:
@@ -135,43 +136,43 @@ class FancyDES():
                     self.message.append(item)
         return self.message
 
-    # f function
-    def f_function(self, block = None, key = None):
+    # f function    
+    def _f_function(self, block = None, key = None):
         # print(type(block), type(key))
         xor_result = block ^ key
-        shift_result = self.shift_horizontal(xor_result, key)
-        shift_result2 = self.shift_vertical(block, block)
+        shift_result = self._shift_horizontal(xor_result, key)
+        shift_result2 = self._shift_vertical(block, block)
         a  = shift_result ^ shift_result2
 
         # TODO: Ubah parameter shift jadi (block, num_shift)
         # shift vertical pake random dengan seed = jumlah message
 
         # subsitusi s-box
-        sbox_result = self.sub_sbox(a, sbox.sbox)
+        sbox_result = self._sub_sbox(a, sbox.sbox)
         return sbox_result
 
-    def get_num_round(self):
-        sum = 0
+    def _get_num_round(self):
+        count_sum = 0
         for i in self.key:
-            sum += ord(i)
-        random.seed(sum)
+            count_sum += ord(i)
+        random.seed(count_sum)
         n_round = random.randint(7,25)
         return n_round
 
-    def feistel_network(self, blocks, n_round):
+    def _feistel_network(self, blocks, n_round):
         block_left = blocks[0]
         block_right = blocks[1]
 
         #initiate with transpose
-        block_left = self.transpose(block_left)
-        block_right = self.transpose(block_right)
+        block_left = self._transpose(block_left)
+        block_right = self._transpose(block_right)
 
         # process block
 
         for i in range(n_round):
             key_internal = self.internal_keys[i]
             # Fungsi f terhadap blok kanan
-            f_result = self.f_function(block_right, key_internal)
+            f_result = self._f_function(block_right, key_internal)
 
             # xor
             temp = block_left ^ f_result
@@ -184,19 +185,17 @@ class FancyDES():
                 block_left = temp
                 block_right = block_right
 
-        block_left = self.transpose_back(block_left)
-        block_right = self.transpose_back(block_right)
-
+        block_left = self._transpose_back(block_left)
+        block_right = self._transpose_back(block_right)
         return [block_left, block_right]
 
-    def generate_iv(self):
+    def _generate_iv(self):
         iv = [0,0]
         iv[0] = np.array([[random.randint(0,255) for i in range(4)] for i in range(4)])
         iv[1] = np.array([[random.randint(0,255) for i in range(4)] for i in range(4)])
-
         return iv
 
-    def increment_iv(self, block):
+    def _increment_iv(self, block):
         for idx in range(31,-1,-1):
             i = idx // 16
             j = (idx // 4) % 4
@@ -209,13 +208,13 @@ class FancyDES():
         return block
 
     def generate_cipher(self, decrypt=False, mode="ECB"):
-        n_round = self.get_num_round()
+        n_round = self._get_num_round()
         # print('round', n_round)
-        blocks = self.getBlocks()
+        blocks = self._get_blocks()
         # print("blocklen",len(blocks))
-        self.gen_internal_key(n_round)
+        self._gen_internal_key(n_round)
         # print('intkey', len(self.internal_keys))
-        box = sbox.sbox
+        # box = sbox.sbox
 
         if (decrypt and mode in ["CBC", "ECB"]):
             self.internal_keys = self.internal_keys[::-1]
@@ -223,10 +222,10 @@ class FancyDES():
 
         out_blocks = []
         # pprint(self.internal_keys)
-        prev_block = iv = self.generate_iv()
+        prev_block = iv = self._generate_iv()
         for i in range(0, len(blocks), 2):
             if (mode == "ECB"):
-                cipher = self.feistel_network(blocks[i:i+2], n_round)
+                cipher = self._feistel_network(blocks[i:i+2], n_round)
                 out_blocks.append(cipher[0])
                 out_blocks.append(cipher[1])
             elif (mode == "CBC"):
@@ -236,7 +235,7 @@ class FancyDES():
                     curr_blocks[0] = curr_blocks[0] ^ prev_block[0]
                     curr_blocks[1] = curr_blocks[1] ^ prev_block[1]
 
-                cipher = self.feistel_network(curr_blocks, n_round)
+                cipher = self._feistel_network(curr_blocks, n_round)
 
                 if (decrypt):
                     cipher[0] = cipher[0] ^ prev_block[0]
@@ -248,18 +247,18 @@ class FancyDES():
                 out_blocks.append(cipher[0])
                 out_blocks.append(cipher[1])
             elif (mode == "CTR"):
-                cipher = self.feistel_network(iv, n_round)
+                cipher = self._feistel_network(iv, n_round)
                 # print (cipher)
                 cipher[0] = cipher[0] ^ blocks[i]
                 cipher[1] = cipher[1] ^ blocks[i+1]
 
-                iv = self.increment_iv(iv)
+                iv = self._increment_iv(iv)
 
                 out_blocks.append(cipher[0])
                 out_blocks.append(cipher[1])
             elif (mode == "CFB"):
                 curr_blocks = blocks[i:i+2]
-                prev_block = self.feistel_network(prev_block,n_round)
+                prev_block = self._feistel_network(prev_block,n_round)
                 cipher = []
                 cipher.append(curr_blocks[0] ^ prev_block[0])
                 cipher.append(curr_blocks[1] ^ prev_block[1])
@@ -272,12 +271,12 @@ class FancyDES():
                     prev_block = cipher
             elif (mode == "OFB"):
                 curr_blocks = blocks[i:i+2]
-                prev_block = self.feistel_network(prev_block, n_round)
+                prev_block = self._feistel_network(prev_block, n_round)
                 out_blocks.append(curr_blocks[0] ^ prev_block[0])
                 out_blocks.append(curr_blocks[1] ^ prev_block[1])
 
         # print(len(out_blocks))
-        cipher = self.blocksToMessage(out_blocks)
+        cipher = self._blocks_to_message(out_blocks)
         return cipher
 
 
@@ -285,7 +284,7 @@ if __name__ == '__main__':
     MODE = "OFB"
     # fancyDES = FancyDES(path='samples/short.txt',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
     # fancyDES = FancyDES(path='samples/text.txt',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
-    fancyDES = FancyDES(path='samples/lorem-ipsum.txt',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
+    fancyDES = FancyDES(path='samples/lorem-ipsum.txt', key = 'HELLO WORLD! HAHAHHA', fromFile=True)
     #fancyDES = FancyDES(path='LICENSE', key = 'HELLO WORLD! HAHAHHA', fromFile=True)
 
     b = bytearray(fancyDES.message)
