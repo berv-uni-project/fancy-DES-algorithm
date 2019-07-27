@@ -4,6 +4,6 @@
 
 Block Cipher with Feistel Network Looks Like DES. Using fancy transposition and f function.
 
-# LICENSE
+## LICENSE
 
 MIT
