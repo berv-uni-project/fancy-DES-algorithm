@@ -51,11 +51,11 @@ class FancyDES():
         # generate other key
         count_sum = n_round - 1
         for i in range(n_round - 1):
-            print(f'Blocking Percentage {i * 100.0 / count_sum} %')
             new_block = self._sub_sbox(block, sbox.sbox)
             new_block = block ^ new_block
             self.internal_keys.append(new_block)
             block = new_block
+            print(f'Blocking Percentage {(i + 1) * 100.0 / count_sum} %')
     
     def _transpose(self, message = None):
         output = [[message[3-i][j] for i in range(4)] for j in range(4)]
@@ -97,9 +97,9 @@ class FancyDES():
         for i in range(4):
             temp = []
             for j in range(4):
-                print(f'Block convert percentage {j * 100.0 / 16}%')
                 temp.append(message[pos])
                 pos += 1
+                print(f'Block convert {i},{j}')
             out.append(temp)
         # pprint(out)
         return np.array(out)
@@ -109,10 +109,10 @@ class FancyDES():
         position = 0
         blocks = []
         for i in range(n):
-            print(f'Convert Message {i * 100.0 / n} %')
             block = message[position:position+16]
             blocks.append(self._message_to_block(block))
             position += 16
+            print(f'Convert Message {(i + 1) * 100 / n} %')
         return blocks
 
     # get block from bytes of message
