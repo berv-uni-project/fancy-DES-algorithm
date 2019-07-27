@@ -7,6 +7,9 @@ import random
 import numpy as np
 import time
 import binascii
+import os
+
+not_print = open(os.devnull, 'w')
 
 class FancyDES():
 
@@ -55,7 +58,7 @@ class FancyDES():
             new_block = block ^ new_block
             self.internal_keys.append(new_block)
             block = new_block
-            print(f'Blocking Percentage {(i + 1) * 100.0 / count_sum} %')
+            print(f'Blocking Percentage {(i + 1) * 100.0 / count_sum} %', file = not_print)
     
     def _transpose(self, message = None):
         output = [[message[3-i][j] for i in range(4)] for j in range(4)]
@@ -99,7 +102,7 @@ class FancyDES():
             for j in range(4):
                 temp.append(message[pos])
                 pos += 1
-                print(f'Block convert {i},{j}')
+                print(f'Block convert {i},{j}', file = not_print)
             out.append(temp)
         # pprint(out)
         return np.array(out)
@@ -112,7 +115,7 @@ class FancyDES():
             block = message[position:position+16]
             blocks.append(self._message_to_block(block))
             position += 16
-            print(f'Convert Message {(i + 1) * 100 / n} %')
+            print(f'Convert Message {(i + 1) * 100 / n} %', file = not_print)
         return blocks
 
     # get block from bytes of message
