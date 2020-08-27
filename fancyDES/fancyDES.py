@@ -2,6 +2,7 @@
 from collections import deque
 import hashlib
 import random
+import secrets
 import numpy as np
 import binascii
 import os
@@ -193,8 +194,8 @@ class FancyDES():
 
     def _generate_iv(self):
         iv = [0,0]
-        iv[0] = np.array([[random.randint(0,255) for i in range(4)] for i in range(4)])
-        iv[1] = np.array([[random.randint(0,255) for i in range(4)] for i in range(4)])
+        iv[0] = np.array([[secrets.randbelow(256) for i in range(4)] for i in range(4)])
+        iv[1] = np.array([[secrets.randbelow(256) for i in range(4)] for i in range(4)])
         return iv
 
     def _increment_iv(self, block):
