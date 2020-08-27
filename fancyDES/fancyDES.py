@@ -8,7 +8,7 @@ import time
 import binascii
 import os
 
-from fancyDES.sbox import *
+from fancyDES.sbox import * as sbox
 
 not_print = open(os.devnull, 'w')
 
