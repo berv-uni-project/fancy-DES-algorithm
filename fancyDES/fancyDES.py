@@ -59,7 +59,7 @@ class FancyDES():
             self.internal_keys.append(new_block)
             block = new_block
             print(f'Blocking Percentage {(i + 1) * 100.0 / count_sum} %', file = not_print)
-    
+
     def _transpose(self, message = None):
         output = [[message[3-i][j] for i in range(4)] for j in range(4)]
         return np.array(output)
@@ -139,7 +139,7 @@ class FancyDES():
                     self.message.append(item)
         return self.message
 
-    # f function    
+    # f function
     def _f_function(self, block = None, key = None):
         # print(type(block), type(key))
         xor_result = block ^ key
@@ -282,12 +282,11 @@ class FancyDES():
         cipher = self._blocks_to_message(out_blocks)
         return cipher
 
-
-if __name__ == '__main__':
+def main():
     MODE = "OFB"
     # fancyDES = FancyDES(path='samples/short.txt',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
     # fancyDES = FancyDES(path='samples/text.txt',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
-    fancyDES = FancyDES(path='samples/lorem-ipsum.txt', key = 'HELLO WORLD! HAHAHHA', fromFile=True)
+    fancyDES = FancyDES(path='../samples/lorem-ipsum.txt', key = 'HELLO WORLD! HAHAHHA', fromFile=True)
     #fancyDES = FancyDES(path='LICENSE', key = 'HELLO WORLD! HAHAHHA', fromFile=True)
 
     b = bytearray(fancyDES.message)
@@ -307,7 +306,7 @@ if __name__ == '__main__':
     # check changed ciphertext
     # cipher[4] += 1
 
-    f = open('samples/output/output-'+MODE+'.txt', 'wb')
+    f = open('../samples/output/output-'+MODE+'.txt', 'wb')
     f.write(cipher)
     f.close()
     fancyDES1 = FancyDES(message=cipher, key = 'HELLO WORLD! HAHAHHA', fromFile=False)
@@ -315,3 +314,6 @@ if __name__ == '__main__':
     print('Decrypted:')
     # print(binascii.hexlify(plainteks), len(plainteks))
     print(plainteks, len(plainteks))
+
+if __name__ == '__main__':
+    main()
