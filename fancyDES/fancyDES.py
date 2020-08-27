@@ -1,13 +1,14 @@
 #!/usr/bin/python3
 from collections import deque
 from pprint import pprint
-import sbox
 import hashlib
 import random
 import numpy as np
 import time
 import binascii
 import os
+
+import fancyDES.sbox
 
 not_print = open(os.devnull, 'w')
 
