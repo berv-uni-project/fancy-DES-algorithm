@@ -8,7 +8,7 @@ import time
 import binascii
 import os
 
-from fancyDES.sbox import * as sbox
+from fancyDES.sbox import sub as sbox_sub, sbox
 
 not_print = open(os.devnull, 'w')
 
@@ -31,7 +31,7 @@ class FancyDES():
             for j in range(4):
                 # cell = int(block[i][j], 16)
                 cell = block[i][j]
-                new_block[i][j] = sbox.sub(cell, box)
+                new_block[i][j] = sbox_sub(cell, box)
         return new_block
 
     # Generate internal key used in each round
@@ -55,7 +55,7 @@ class FancyDES():
         # generate other key
         count_sum = n_round - 1
         for i in range(n_round - 1):
-            new_block = self._sub_sbox(block, sbox.sbox)
+            new_block = self._sub_sbox(block, sbox)
             new_block = block ^ new_block
             self.internal_keys.append(new_block)
             block = new_block
@@ -152,7 +152,7 @@ class FancyDES():
         # shift vertical pake random dengan seed = jumlah message
 
         # subsitusi s-box
-        sbox_result = self._sub_sbox(a, sbox.sbox)
+        sbox_result = self._sub_sbox(a, sbox)
         return sbox_result
 
     def _get_num_round(self):
