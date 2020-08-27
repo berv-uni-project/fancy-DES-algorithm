@@ -287,7 +287,7 @@ def main():
     MODE = "OFB"
     # fancyDES = FancyDES(path='samples/short.txt',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
     # fancyDES = FancyDES(path='samples/text.txt',key = 'HELLO WORLD! HAHAHHA', fromFile=True)
-    fancyDES = FancyDES(path='../samples/lorem-ipsum.txt', key = 'HELLO WORLD! HAHAHHA', fromFile=True)
+    fancyDES = FancyDES(path='samples/lorem-ipsum.txt', key = 'HELLO WORLD! HAHAHHA', fromFile=True)
     #fancyDES = FancyDES(path='LICENSE', key = 'HELLO WORLD! HAHAHHA', fromFile=True)
 
     b = bytearray(fancyDES.message)
@@ -307,7 +307,7 @@ def main():
     # check changed ciphertext
     # cipher[4] += 1
 
-    f = open('../samples/output/output-'+MODE+'.txt', 'wb')
+    f = open('samples/output/output-'+MODE+'.txt', 'wb')
     f.write(cipher)
     f.close()
     fancyDES1 = FancyDES(message=cipher, key = 'HELLO WORLD! HAHAHHA', fromFile=False)
