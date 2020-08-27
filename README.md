@@ -8,8 +8,7 @@ Block Cipher with Feistel Network Looks Like DES. Using fancy transposition and 
 
 | Travis | Github Action (Docker) | Github Action (Python Publish) |
 |:------:|:----------------------:|:------------------------------:|
-| [![Build Status](https://travis-ci.com/berv-uni-project/fancy-DES-algorithm.svg?branch=master)](https://travis-ci.com/berv-uni-project/fancy-DES-algorithm)
- | ![Docker](https://github.com/berv-uni-project/fancy-DES-algorithm/workflows/Docker/badge.svg) | ![Upload Python Package](https://github.com/berv-uni-project/fancy-DES-algorithm/workflows/Upload%20Python%20Package/badge.svg) |
+| [![Build Status](https://travis-ci.com/berv-uni-project/fancy-DES-algorithm.svg?branch=master)](https://travis-ci.com/berv-uni-project/fancy-DES-algorithm) | ![Docker](https://github.com/berv-uni-project/fancy-DES-algorithm/workflows/Docker/badge.svg) | ![Upload Python Package](https://github.com/berv-uni-project/fancy-DES-algorithm/workflows/Upload%20Python%20Package/badge.svg) |
 
 ## Publication
 
