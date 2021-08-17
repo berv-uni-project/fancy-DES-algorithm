@@ -17,6 +17,8 @@ class FancyDES:
             with open(path, "rb") as files:
                 self.message = files.read()
         else:
+            if message == None:
+                raise ValueError('Message required')
             self.message = message
         # print("MSG", self.message)
         self.key = key
