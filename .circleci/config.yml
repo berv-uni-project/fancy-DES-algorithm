@@ -18,7 +18,7 @@ jobs:
             pytest
           name: Test
 orbs:
-  python: circleci/python@1.4.0
+  python: circleci/python@2.0.3
 workflows:
   main:
     jobs:
