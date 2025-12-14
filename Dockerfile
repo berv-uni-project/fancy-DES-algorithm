@@ -9,7 +9,7 @@ RUN /opt/venv/bin/pip install --no-cache-dir -r requirements.txt
 
 FROM python:3.14.1-alpine AS final
 WORKDIR /app
-COPY --from=builder /opt/venv /opt/venv
+COPY --from=build /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 COPY . .
 CMD ["python", "main.py"]
