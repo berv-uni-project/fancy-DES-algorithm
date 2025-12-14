@@ -3,7 +3,7 @@ jobs:
   build:
     executor: 
       name: python/default
-      tag: "3.12"
+      tag: "3.14"
     steps:
       - checkout
       - python/install-packages:
